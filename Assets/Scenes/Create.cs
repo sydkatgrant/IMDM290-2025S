@@ -10,6 +10,8 @@ public class Create : MonoBehaviour
 {
     GameObject[] spheres;
     static int numSphere = 100; 
+    float closeness = 30;
+    float distanceChange = -0.5f;
     float time = 0f;
     Vector3[] initPos;
     // Start is called before the first frame update
@@ -26,21 +28,37 @@ public class Create : MonoBehaviour
 
         // Let there be spheres..
         for (int i =0; i < numSphere; i++){
-            float r = 10f; // radius of the circle
+            float r = 5f; // radius of the circle
             // Draw primitive elements:
             // https://docs.unity3d.com/6000.0/Documentation/ScriptReference/GameObject.CreatePrimitive.html
             spheres[i] = GameObject.CreatePrimitive(PrimitiveType.Sphere); 
             // Initial positions of the spheres. make it in circle with r radius.
-            // https://www.cuemath.com/geometry/unit-circle/
-            initPos[i] = new Vector3(r * Mathf.Sin(i * 2 * Mathf.PI / numSphere), r * Mathf.Cos(i * 2 * Mathf.PI / numSphere), 10f);
+            // https://www.cuemath.com/gemometry/unit-circle/
+            initPos[i] = new Vector3(r * Mathf.Sqrt(2f) * Mathf.Pow(Mathf.Sin(i * 2f * Mathf.PI / numSphere), 3f), r * (-Mathf.Pow(Mathf.Cos(i * 2f * Mathf.PI / numSphere), 3f) - Mathf.Pow(Mathf.Cos(i * 2f * Mathf.PI / numSphere), 2f) + 2f*Mathf.Cos(i * 2f * Mathf.PI / numSphere)) + 2f, closeness);
             spheres[i].transform.position = initPos[i];
 
             // Get the renderer of the spheres and assign colors.
             Renderer sphereRenderer = spheres[i].GetComponent<Renderer>();
             // hsv color space: https://en.wikipedia.org/wiki/HSL_and_HSV
             float hue = (float)i / numSphere; // Hue cycles through 0 to 1
-            Color color = Color.HSVToRGB(hue, 1f, 1f); // Full saturation and brightness
+            Color color = Color.HSVToRGB(hue, 0.5f, 1f); // Full saturation and brightness
             sphereRenderer.material.color = color;
         }
     }
+
+    void Update() 
+    {
+        closeness = closeness + distanceChange;
+        if(closeness > 30) {
+            distanceChange = -0.5f;
+        }
+
+        if(closeness < 10) {
+            distanceChange = 0.5f;
+        }
+        foreach(GameObject sphere in spheres) {
+            sphere.transform.position = new Vector3(sphere.transform.position.x, sphere.transform.position.y, closeness);
+        }
+    }
+        
 }
